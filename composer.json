@@ -1,0 +1,18 @@
+{
+    "name": "shura/php-css-color",
+    "description": "CSS color parser",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "shurizzle",
+            "email": "shura1991@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Shura\\CSS\\Color\\": "src/"
+        }
+    },
+    "require": {}
+}
