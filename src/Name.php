@@ -155,10 +155,10 @@ class Name
         'transparent' => 'rgba(0,0,0,0)'
     ];
 
-    private static $from_color = [
+    private static $from_color_1 = [
         '000000' => 'black',
         'c0c0c0' => 'silver',
-        '808080' => 'grey',
+        '808080' => 'gray',
         'ffffff' => 'white',
         '800000' => 'maroon',
         'ff0000' => 'red',
@@ -171,8 +171,15 @@ class Name
         '000080' => 'navy',
         '0000ff' => 'blue',
         '008080' => 'teal',
-        '00ffff' => 'cyan',
+        '00ffff' => 'aqua',
+    ];
+
+    private static $from_color_2 = [
         'ffa500' => 'orange',
+    ];
+
+    private static $from_color_3 = [
+        '00ffff' => 'cyan',
         'f0f8ff' => 'aliceblue',
         'faebd7' => 'antiquewhite',
         '7fffd4' => 'aquamarine',
@@ -193,7 +200,7 @@ class Name
         '00008b' => 'darkblue',
         '008b8b' => 'darkcyan',
         'b8860b' => 'darkgoldenrod',
-        'a9a9a9' => 'darkgrey',
+        'a9a9a9' => 'darkgray',
         '006400' => 'darkgreen',
         'bdb76b' => 'darkkhaki',
         '8b008b' => 'darkmagenta',
@@ -204,12 +211,12 @@ class Name
         'e9967a' => 'darksalmon',
         '8fbc8f' => 'darkseagreen',
         '483d8b' => 'darkslateblue',
-        '2f4f4f' => 'darkslategrey',
+        '2f4f4f' => 'darkslategray',
         '00ced1' => 'darkturquoise',
         '9400d3' => 'darkviolet',
         'ff1493' => 'deeppink',
         '00bfff' => 'deepskyblue',
-        '696969' => 'dimgrey',
+        '696969' => 'dimgray',
         '1e90ff' => 'dodgerblue',
         'b22222' => 'firebrick',
         'fffaf0' => 'floralwhite',
@@ -233,13 +240,13 @@ class Name
         'f08080' => 'lightcoral',
         'e0ffff' => 'lightcyan',
         'fafad2' => 'lightgoldenrodyellow',
-        'd3d3d3' => 'lightgrey',
+        'd3d3d3' => 'lightgray',
         '90ee90' => 'lightgreen',
         'ffb6c1' => 'lightpink',
         'ffa07a' => 'lightsalmon',
         '20b2aa' => 'lightseagreen',
         '87cefa' => 'lightskyblue',
-        '778899' => 'lightslategrey',
+        '778899' => 'lightslategray',
         'b0c4de' => 'lightsteelblue',
         'ffffe0' => 'lightyellow',
         '32cd32' => 'limegreen',
@@ -282,7 +289,7 @@ class Name
         'a0522d' => 'sienna',
         '87ceeb' => 'skyblue',
         '6a5acd' => 'slateblue',
-        '708090' => 'slategrey',
+        '708090' => 'slategray',
         'fffafa' => 'snow',
         '00ff7f' => 'springgreen',
         '4682b4' => 'steelblue',
@@ -294,14 +301,26 @@ class Name
         'f5deb3' => 'wheat',
         'f5f5f5' => 'whitesmoke',
         '9acd32' => 'yellowgreen',
-        '663399' => 'rebeccapurple'
     ];
 
-    public static function fromColor(Color $color)
+    private static $from_color_4 = [ // not a standard
+        '663399' => 'rebeccapurple',
+    ];
+
+    public static function fromColor(Color $color, bool $lts = false)
     {
         $hex = mb_strtolower(preg_replace('/^#/', '', $color->toHex(false)), 'UTF-8');
 
-        return isset(self::$from_color[$hex]) ? self::$from_color[$hex] : null;
+        if ($lts) {
+            return isset(self::$from_color_1[$hex]) ? self::$from_color_1[$hex] : null;
+        } else {
+            for ($i = 1; $i <= 3; $i++) {
+                if (isset(self::${"from_color_$i"}[$hex])) {
+                    return self::${"from_color_$i"}[$hex];
+                }
+            }
+            return null;
+        }
     }
 
     public static function toColor(string $color)
