@@ -90,17 +90,21 @@ class Color
         return Name::fromColor($this);
     }
 
-    public function toHex(bool $compress = true)
+    public function toHex(bool $compress = true, bool $alpha = true)
     {
-        $color = sprintf("%02x%02x%02x%02x", $this->red, $this->green, $this->blue, round($this->alpha * 255));
+        if ($alpha) {
+            $color = sprintf("%02x%02x%02x%02x", $this->red, $this->green, $this->blue, round($this->alpha * 255));
 
-        $color = preg_replace('/ff$/i', '', $color);
+            $color = preg_replace('/ff$/i', '', $color);
 
-        if ($compress) {
-            $color = preg_replace('/^([0-9a-f])\1([0-9a-f])\2([0-9a-f])\3(?:([0-9a-f])\4)?$/i', '$1$2$3$4', $color);
+            if ($compress) {
+                $color = preg_replace('/^([0-9a-f])\1([0-9a-f])\2([0-9a-f])\3(?:([0-9a-f])\4)?$/i', '$1$2$3$4', $color);
+            }
+
+            return '#'.mb_strtoupper($color, 'UTF-8');
+        } else {
+            return $this->rgb->toHex($compress);
         }
-
-        return '#'.mb_strtoupper($color, 'UTF-8');
     }
 
     protected function _parse(string $str)
