@@ -26,10 +26,18 @@ class Color
 
     public function __call($method, $args)
     {
-        if (method_exists($this->getRgb(), $method)) {
-            return call_user_func_array([$this->getRgb(), $method], $args);
-        } elseif (method_exists($this->getHsl(), $method)) {
-            return call_user_func_array([$this->getHsl(), $method], $args);
+        if ($method != 'hex') {
+            if (method_exists($this->getRgb(), $method)) {
+                if (preg_match('/^set/', $method)) {
+                    $this->hsl = null;
+                }
+                return call_user_func_array([$this->getRgb(), $method], $args);
+            } elseif (method_exists($this->getHsl(), $method)) {
+                if (preg_match('/^set/', $method)) {
+                    $this->rgb = null;
+                }
+                return call_user_func_array([$this->getHsl(), $method], $args);
+            }
         }
 
         return call_user_func_array([$this, $method], $args);
@@ -52,7 +60,11 @@ class Color
 
     public function setAlpha(float $value)
     {
-        return $this->alpha = $value; // TODO: validation
+        if ($value < 0 || $value > 1) {
+            throw new InvalidArgumentException('Invalid number, value must be in the range of 0 and 1');
+        }
+
+        return $this->alpha = $value;
     }
 
     public function getRgb()
@@ -73,6 +85,11 @@ class Color
         return $this->hsl;
     }
 
+    public function getName()
+    {
+        return Name::fromColor($this);
+    }
+
     public function toHex(bool $compress = true)
     {
         $color = sprintf("%02x%02x%02x%02x", $this->red, $this->green, $this->blue, round($this->alpha * 255));
@@ -88,7 +105,7 @@ class Color
 
     protected function _parse(string $str)
     {
-        $str = trim(mb_strtoupper($str, 'UTF-8'));
+        $str = trim(mb_strtolower($str, 'UTF-8'));
 
         if (preg_match('/^#([0-9A-F]{3,4})$/i', $str, $matches)) {
             $p = array_map(function ($h) {
@@ -106,10 +123,9 @@ class Color
             $this->parseRgb(...$matches);
         } elseif (preg_match('/^hsla?\s*\(\s*((?:360|3[0-5][0-9]|[12][0-9][0-9]|[1-9]?[0-9])(?:deg)?)\s*,\s*((?:100|[1-9]?[0-9])%)\s*,\s*((?:100|[1-9]?[0-9])%)\s*(?:,\s*(((?:1(\.0*)?|0?\.[0-9])|(?:100|[1-9]?[0-9])%)))?\)/i', $str, $matches)) {
             array_shift($matches);
-            var_dump($matches);
             $this->parseHsl(...$matches);
         } else {
-            throw new \Exception();
+            throw new \Exception('Couldn\'t parse color `'.$str.'\'');
         }
     }
 
@@ -119,30 +135,53 @@ class Color
             return (float) $a;
         }
 
-        return ((int) preg_replace('/%$/', '', $a)) / 100.0;
+        return $this->parsePercent($a);
+    }
+
+    protected function parseHexColor($c)
+    {
+        if (is_numeric($c)) {
+            return (int) $c;
+        }
+
+        return round($this->parsePercent($c) * 255);
+    }
+
+    protected function parseHue($h)
+    {
+        $h = preg_replace('/deg$/i', '', $h);
+        if (is_numeric($h)) {
+            return $h / 360.0;
+        }
+
+        return $this->parsePercent($h);
+    }
+
+    protected function parsePercent($p)
+    {
+        return ((float) preg_replace('/%$/', '', $p)) / 100.0;
     }
 
     protected function parseHex($r, $g, $b, $a = 'FF')
     {
-        return $this->parseRgba(hexdec($r), hexdec($g), hexdec($b), hexdec($a) / 255);
+        return $this->parseRgb(hexdec($r), hexdec($g), hexdec($b), hexdec($a) / 255);
     }
 
     protected function parseRgb($r, $g, $b, $a = '1')
     {
-        echo "rgba({$r}, {$g}, {$b}, {$a})\n";
-        $this->rgb = new RGB((int) $r, (int) $g, (int) $b); // TODO: convert percent
+        $this->rgb = new RGB($this->parseHexColor($r), $this->parseHexColor($g), $this->parseHexColor($b));
         $this->setAlpha($this->parseAlpha($a));
     }
 
     protected function parseHsl($h, $s, $l, $a = '1')
     {
-        echo "hsla({$h}, {$s}, {$l}, {$a})\n";
-        // TODO: convert
+        $this->hsl = new HSL($this->parseHue($h), $this->parsePercent($s), $this->parsePercent($l));
         $this->setAlpha($this->parseAlpha($a));
     }
 
     public static function parse(string $str)
     {
+        $str = Name::toColor($str) ?? $str;
         $obj = new static();
         $obj->_parse($str);
 

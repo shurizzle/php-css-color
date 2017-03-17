@@ -74,25 +74,37 @@ class RGB
 
     public function setRed(int $value)
     {
-        $this->red = $value; // TODO: validate
+        if ($value < 0 || $value > 255) {
+            throw new InvalidArgumentException('Invalid number, value must be in the range of 0 and 255');
+        }
+
+        $this->red = $value;
     }
 
     public function setGreen(int $value)
     {
-        $this->green = $value; // TODO: validate
+        if ($value < 0 || $value > 255) {
+            throw new InvalidArgumentException('Invalid number, value must be in the range of 0 and 255');
+        }
+
+        $this->green = $value;
     }
 
     public function setBlue(int $value)
     {
-        $this->blue = $value; // TODO: validate
+        if ($value < 0 || $value > 255) {
+            throw new InvalidArgumentException('Invalid number, value must be in the range of 0 and 255');
+        }
+
+        $this->blue = $value;
     }
 
-    public function getHsl(bool $compress = true)
+    public function getHsl()
     {
-        return $this->toHSL($compress);
+        return $this->toHsl();
     }
 
-    public function toHSL()
+    public function toHsl()
     {
         $rd = (float) ($this->red / 255.0);
         $gd = (float) ($this->green / 255.0);
@@ -122,7 +134,7 @@ class RGB
 
     public function toHex(bool $compress = true)
     {
-        $color = sprintf("%02x%02x%02x%02x", $this->red, $this->green, $this->blue);
+        $color = sprintf("%02x%02x%02x", $this->red, $this->green, $this->blue);
 
         if ($compress) {
             $color = preg_replace('/^([0-9a-f])\1([0-9a-f])\2([0-9a-f])\3$/i', '$1$2$3', $color);

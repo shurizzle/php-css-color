@@ -1,5 +1,5 @@
 {
-    "name": "shura/php-css-color",
+    "name": "shura/css-color",
     "description": "CSS color parser",
     "type": "library",
     "license": "MIT",

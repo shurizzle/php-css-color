@@ -2,6 +2,8 @@
 
 namespace Shura\CSS\Color;
 
+use InvalidArgumentException;
+
 class HSL
 {
     private $hue;
@@ -74,22 +76,34 @@ class HSL
 
     public function setHue(float $value)
     {
-        $this->hue = $value; // TODO: validation
+        if ($value < 0 || $value > 1) {
+            throw new InvalidArgumentException('Invalid number, value must be in the range of 0 and 1');
+        }
+
+        $this->hue = $value;
     }
 
     public function setSaturation(float $value)
     {
+        if ($value < 0 || $value > 1) {
+            throw new InvalidArgumentException('Invalid number, value must be in the range of 0 and 1');
+        }
+
         $this->saturation = $value; // TODO: validation
     }
 
     public function setLightness(float $value)
     {
+        if ($value < 0 || $value > 1) {
+            throw new InvalidArgumentException('Invalid number, value must be in the range of 0 and 1');
+        }
+
         $this->lightness = $value; // TODO: validation
     }
 
     public function getRgb()
     {
-        return $this->toRGB();
+        return $this->toRgb();
     }
 
     public function getHex(bool $compress = true)
@@ -97,7 +111,7 @@ class HSL
         return $this->toHex($compress);
     }
 
-    public function toRGB()
+    public function toRgb()
     {
         $r = $g = $b = null;
 
@@ -139,6 +153,6 @@ class HSL
 
     public function toHex(bool $compress = true)
     {
-        return $this->toRGB()->toHex($compress);
+        return $this->toRgb()->toHex($compress);
     }
 }
