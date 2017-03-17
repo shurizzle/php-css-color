@@ -191,4 +191,49 @@ class Color
 
         return $obj;
     }
+
+    public function getMin(bool $lts = false)
+    {
+        $opts = [];
+
+        if ($lts) {
+            $color = Name::fromColor($this, $lts);
+            if (isset($color)) {
+                $opts[] = $color;
+            }
+            $opts[] = $this->toHex(true, false);
+            $opts[] = "rgb({$this->r},{$this->g},{$this->b})";
+        } else {
+            $h = round($this->h * 360);
+            $s = round($this->s * 100);
+            $l = round($this->l * 100);
+            if ($this->a < 1) {
+                if ($this->r == 0 && $this->g == 0 && $this->b == 0 && $this->a == 0) {
+                    $opts[] = 'transparent';
+                }
+                $a = sprintf('%.2f', $this->a);
+                $opts[] = "rgba({$this->r},{$this->g},{$this->b},{$a})";
+                $opts[] = "hsla({$h},{$s}%,{$l}%,{$a})";
+            } else {
+                $color = Name::fromColor($this, $lts);
+                if (isset($color)) {
+                    $opts[] = $color;
+                }
+                $opts[] = $this->toHex(true, false);
+                $opts[] = "rgb({$this->r},{$this->g},{$this->b})";
+                $opts[] = "hsl({$h},{$s}%,{$l}%)";
+            }
+        }
+
+        usort($opts, function ($a, $b) {
+            return mb_strlen($a) - mb_strlen($b);
+        });
+
+        return $opts[0];
+    }
+
+    public function __toString()
+    {
+        $this->getMin();
+    }
 }
